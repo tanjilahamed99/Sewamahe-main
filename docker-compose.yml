@@ -5,7 +5,7 @@ services:
     build: ./backend
     container_name: sewamahe-backend
     ports:
-      - "5000:5000"
+      - "5005:5005"
     restart: always
  
   frontend:
