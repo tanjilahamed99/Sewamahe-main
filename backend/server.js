@@ -10,7 +10,7 @@ Config = require("./config");
 const path = require("path");
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5005;
 const app = express();
 
 const server = http.createServer(app);
@@ -98,7 +98,7 @@ app.get("/", (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: "Something broke!" });
 });
