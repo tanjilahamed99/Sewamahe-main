@@ -3,16 +3,16 @@ version: "3.9"
 services:
   backend:
     build: ./backend
-    container_name: node-backend
+    container_name: sewamahe-backend
     ports:
       - "5000:5000"
     restart: always
  
   frontend:
     build: ./frontend
-    container_name: react-frontend
+    container_name: sewamahe-frontend
     ports:
-      - "4000:4000"
+      - "5173:5173"
     depends_on:
       - backend
     restart: always
