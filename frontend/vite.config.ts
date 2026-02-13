@@ -16,4 +16,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   base: "/",
+  server: {
+    host: true,
+    allowedHosts:["sewamahe.in"]
+  }
 }));
