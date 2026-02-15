@@ -5,7 +5,7 @@ import IO from "socket.io-client";
 let socket = null;
 export const initSocket = (token: string) => {
     if (!socket) {
-        socket = IO(configuration.url, {
+        socket = IO("sewamahe.in", {
             auth: { token },
             transports: ["websocket"],
             withCredentials: true,
