@@ -53,7 +53,7 @@ export function MonetizationPopup({
 
     if (amount > info.balance.amount)
       return setErrors({ type: "amount", message: "Insufficient balance" });
-
+    
     if (!paymentMethod)
       return setErrors({ type: "paymentMethod", message: "Choose a method" });
 

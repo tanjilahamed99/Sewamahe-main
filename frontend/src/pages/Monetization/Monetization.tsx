@@ -8,6 +8,7 @@ import { MonetizationPopup } from "./components/MonetizationPopup";
 import getWebsiteInfo from "@/actions/getWebsiteInfo";
 import { useNavigate } from "react-router-dom";
 import TopUp from "./components/TopUp";
+import { toast } from "sonner";
 
 export default function Monetization() {
   const user = useAppSelector((state) => state.auth.user);
@@ -33,6 +34,13 @@ export default function Monetization() {
     }
 
     return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+  };
+
+  const openModal = () => {
+    if (user.balance.amount < 100) {
+      return toast.success("Minimum withdrawal amount: ₹100");
+    }
+    setShowModal(true);
   };
 
   useEffect(() => {
@@ -113,7 +121,7 @@ export default function Monetization() {
                     />
                     <Button
                       className="bg-[#086e05ff] hover:bg-[#086e05d5] text-white cursor-pointer rounded-md py-3 px-6 flex-1 text-center font-medium transition-colors"
-                      onClick={() => setShowModal(true)}>
+                      onClick={() => openModal()}>
                       Withdraw
                     </Button>
                   </div>
@@ -153,8 +161,8 @@ export default function Monetization() {
                               tx.status === "completed"
                                 ? "bg-green-100 text-green-800"
                                 : tx.status === "pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
                             }`}>
                             {tx.status}
                           </span>

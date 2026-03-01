@@ -178,7 +178,6 @@ function ViewWithdrawalRequest(): JSX.Element {
 
   // Define handleUpdateStatus at component level
   const handleUpdateStatus = async (status) => {
-    console.log(status);
     try {
       const response = await updateWithdrawalStatus({ id, data: { status } });
       if (response.data.success) {

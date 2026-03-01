@@ -1,4 +1,3 @@
-import configuration from "@/config/configuration";
 import IO from "socket.io-client";
 
 

@@ -98,15 +98,15 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-center text-gray-400">
                 <Phone className="h-5 w-5 mr-3" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 82990 65387</span>
               </li>
               <li className="flex items-center text-gray-400">
                 <Mail className="h-5 w-5 mr-3" />
-                <span>support@sewamahe.com</span>
+                <span>sewamahe@gmail</span>
               </li>
               <li className="flex items-start text-gray-400">
                 <MapPin className="h-5 w-5 mr-3 mt-1 flex-shrink-0" />
-                <span>123 Tech Street, San Francisco, CA 94107</span>
+                <span>Tara Tower, Polytechnic Crossing, Jaunpur (UP) 222002</span>
               </li>
             </ul>
 

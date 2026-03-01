@@ -58,9 +58,7 @@ const Meeting = () => {
   useEffect(() => {
     if (callStartTime) {
       intervalRef.current = setInterval(() => {
-        const totalSeconds = Math.floor(
-          (new Date().getTime() - callStartTime.getTime()) / 1000,
-        );
+        const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
         if (!incoming && user.type === "user" && callee.type === "Consultant") {
           const price = callee.price || adminDefaultPerMinPrice;
           const myPerSecPrice = parseFloat(price) / 60;
@@ -90,9 +88,7 @@ const Meeting = () => {
   };
 
   const handleDisconnect = async () => {
-    const totalSeconds = Math.floor(
-      (new Date().getTime() - callStartTime.getTime()) / 1000,
-    );
+    const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
 
     // charge system
     if (
@@ -111,8 +107,6 @@ const Meeting = () => {
       return handleCallEnd();
     }
     if (user.type === "Consultant" && !incoming) {
-      console.log("hello");
-      // consultant call has no charge
       return handleCallEnd();
     }
     if (user.type === "Consultant" && incoming && caller.type === "user") {
@@ -120,7 +114,6 @@ const Meeting = () => {
       const myPerSecPrice = parseFloat(price) / 60;
       const myTotalCost = totalSeconds * myPerSecPrice;
       const myRoundedCost = parseFloat(myTotalCost.toFixed(2));
-      console.log(totalSeconds, myPerSecPrice, myRoundedCost);
       const myHistory = {
         historyType: "Call Charge",
         amount: myRoundedCost,

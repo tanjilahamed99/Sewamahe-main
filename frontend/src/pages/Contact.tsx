@@ -31,7 +31,7 @@ export default function Contact() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -44,16 +44,18 @@ export default function Contact() {
     try {
       const { data } = await axios.post(
         `${configuration.url}/api/contact/create`,
-        form
+        form,
       );
       if (data.success) {
         setForm({ name: "", email: "", message: "", subject: "", phone: "" });
-        toast.success("Message sent successfully! We'll get back to you within 24 hours.");
+        toast.success(
+          "Message sent successfully! We'll get back to you within 24 hours.",
+        );
       }
     } catch (err) {
       console.error(err);
       toast.error(
-        "Failed to send message. Please try again or use alternative contact methods."
+        "Failed to send message. Please try again or use alternative contact methods.",
       );
     } finally {
       setIsSubmitting(false);
@@ -64,20 +66,20 @@ export default function Contact() {
     {
       icon: <Mail className="h-6 w-6" />,
       title: "Email Address",
-      details: ["support@sewamahe.com", "help@sewamahe.com"],
+      details: ["sewamahe@gmail.com"],
       subtitle: "For general inquiries and support",
     },
     {
       icon: <Phone className="h-6 w-6" />,
       title: "Phone Support",
-      details: ["+1 (555) 123-4567", "+1 (555) 987-6543"],
+      details: ["+91 82990 65387"],
       subtitle: "Available Monday-Friday, 9AM-6PM EST",
     },
     {
       icon: <MapPin className="h-6 w-6" />,
       title: "Office Location",
-      details: ["123 Business Avenue", "New York, NY 10001", "United States"],
-      subtitle: "Corporate headquarters",
+      details: ["Tara Tower, Polytechnic Crossing, Jaunpur (UP) 222002"],
+      subtitle: "",
     },
     {
       icon: <Clock className="h-6 w-6" />,
@@ -125,7 +127,7 @@ export default function Contact() {
                 Send a Message
               </a>
               <a
-                href="mailto:support@sewamahe.com"
+                href="mailto:sewamahe@gmail.com"
                 className="bg-white text-black border border-black px-8 py-3 rounded-lg font-medium hover:bg-black hover:text-white transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
                 <Mail className="h-5 w-5" />
                 Email Us Directly
@@ -368,15 +370,6 @@ export default function Contact() {
                     </p>
                   </div>
                 </div>
-                {/* <a 
-                  href="/help" 
-                  className="inline-flex items-center gap-2 text-black font-medium mt-6 hover:underline"
-                >
-                  View all FAQs
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </a> */}
               </div>
 
               {/* Emergency Contact */}
@@ -394,9 +387,9 @@ export default function Contact() {
                     <div className="flex items-center gap-2">
                       <Phone className="h-5 w-5 text-red-600" />
                       <a
-                        href="tel:+15551234567"
+                        href="tel:+91 82990 65387"
                         className="text-red-800 font-bold hover:underline">
-                        +1 (555) 123-4567
+                        +91 82990 65387
                       </a>
                     </div>
                   </div>
@@ -421,7 +414,7 @@ export default function Contact() {
                     <div>
                       <div className="font-medium">Business Inquiries</div>
                       <div className="text-gray-300 text-sm">
-                        partnerships@sewamahe.com
+                        sewamahe@gmail.com
                       </div>
                     </div>
                   </div>
@@ -452,7 +445,7 @@ export default function Contact() {
                   <MapPin className="h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-gray-600 font-medium">Interactive Map</p>
                   <p className="text-gray-500 text-sm mt-2">
-                    123 Business Avenue, New York, NY
+                    Tara Tower, Polytechnic Crossing, Jaunpur (UP) 222002
                   </p>
                   <button className="mt-4 px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition">
                     Open in Google Maps

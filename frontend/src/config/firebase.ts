@@ -26,6 +26,5 @@ export const generateToken = async () => {
       vapidKey:
         "BLD3Wqd3EoWKHZOx0x0RfQs3QSFgCB4_kIcG1RzsHfP6LhPQfqEHwCaYtMz4LKtmjOknpEOAPP3MhvkiMWsq6PI",
     });
-    console.log(token);
   }
 };

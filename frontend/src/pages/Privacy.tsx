@@ -395,7 +395,7 @@ const Privacy = () => {
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
-                  <span>Contact our Data Protection Officer at privacy@sewamahe.com</span>
+                  <span>Contact our Data Protection Officer at sewamahe@gmail.com</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -572,7 +572,7 @@ const Privacy = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5" />
-                  <span>privacy@sewamahe.com</span>
+                  <span>sewamahe@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Globe className="h-5 w-5" />

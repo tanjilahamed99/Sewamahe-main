@@ -13,8 +13,6 @@ export default function Ringing() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  console.log(call);
-
   useEffect(() => {
     const audio = new Audio(ringSound);
     audio.loop = true;

@@ -46,9 +46,7 @@ admin
 const io = new Server(server, {
   cors: {
     origin: [
-      "http://localhost:8080",
-      "https://sawamahe-frontend.vercel.app",
-      "http://localhost:4173",
+      "https://sewamahe.in"
     ],
     credentials: true,
   },
@@ -67,9 +65,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "http://localhost:8080",
-      "https://sawamahe-frontend.vercel.app",
-      "http://localhost:4173",
+      "https://sewamahe.in",
     ],
     credentials: true,
   }),

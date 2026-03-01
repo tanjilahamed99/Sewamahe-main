@@ -49,7 +49,6 @@ const ForgetPassword = () => {
     e.preventDefault();
     try {
       const { data } = await forgetPassword(email, authCode, password);
-      console.log(data);
 
       navigate("/login", { replace: true });
       setSent(false);

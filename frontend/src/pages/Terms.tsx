@@ -531,7 +531,7 @@ const Terms = () => {
                   <Mail className="h-5 w-5" />
                   Email Support
                 </h4>
-                <p className="text-gray-300">legal@sewamahe.com</p>
+                <p className="text-gray-300">sewamahe@gmail.com</p>
                 <p className="text-gray-300 text-sm mt-1">
                   For legal inquiries
                 </p>
@@ -549,7 +549,7 @@ const Terms = () => {
                   <HelpCircle className="h-5 w-5" />
                   Help Center
                 </h4>
-                <p className="text-gray-300">help.sewamahe.com</p>
+                <p className="text-gray-300">sewamahe@gmail.com</p>
                 <p className="text-gray-300 text-sm mt-1">FAQs and guides</p>
               </div>
             </div>

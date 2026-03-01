@@ -9,7 +9,7 @@ export interface CallState {
   callee: User | null; // user object
   type: "audio" | "video" | null;
   incoming: boolean; // true = incoming call
-  callStartTime: Date | null;
+  callStartTime: number | null;
   callDuration: number;
 }
 
@@ -51,7 +51,7 @@ export const callSlice = createSlice({
     },
     callAccepted(state) {
       state.status = "in-call";
-      state.callStartTime = new Date();
+      state.callStartTime = Date.now();
     },
     callEnded(state) {
       Object.assign(state, initialState);
