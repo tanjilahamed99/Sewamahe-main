@@ -46,7 +46,7 @@ admin
 const io = new Server(server, {
   cors: {
     origin: [
-      "https://sewamahe.in"
+      "https://sewamahe.in",
     ],
     credentials: true,
   },
