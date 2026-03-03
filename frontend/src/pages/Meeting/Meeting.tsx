@@ -197,8 +197,7 @@ const Meeting = () => {
       }
     }
   };
-
-
+  
   // 🔔 Incoming Call Screen
   if (status === "ringing" || status === "calling") return <Ringing />;
   if (status === "idle") {
