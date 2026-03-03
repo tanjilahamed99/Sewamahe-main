@@ -34,7 +34,7 @@ const Sidebar = ({ className = "", setIsHome }) => {
     const handleLogout = () => {
         dispatch(logout());
         localStorage.removeItem("token")
-        navigate("/");
+        navigate("/login");
     };
 
     useEffect(() => {
