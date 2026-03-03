@@ -18,7 +18,6 @@ const server = http.createServer(app);
 require("dotenv").config();
 
 const admin = require("firebase-admin");
-// var serviceAccount = require("./utils/serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert({
