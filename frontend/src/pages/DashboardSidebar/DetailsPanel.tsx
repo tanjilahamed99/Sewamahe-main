@@ -71,7 +71,7 @@ const DetailsPanel = ({ className = "" }) => {
                         <span className="font-normal">Name: </span>
                         {selectedUser?.firstName} {selectedUser?.lastName}
                     </h3>
-                    {selectedUser.type === "Consultant" && (
+                    {selectedUser?.type === "Consultant" && (
                         <div>
                             <h3 className=" font-semibold">
                                 <span className="font-normal">

@@ -67,7 +67,7 @@ export const RoomNav = () => {
     dispatch(setFavorites(res.favorites));
   };
   const isFavorite = favorites.some(
-    (fav) => fav._id?.toString() === room._id?.toString()
+    (fav) => fav._id?.toString() === room._id?.toString(),
   );
 
   const roomInfo = () => {
@@ -113,6 +113,9 @@ export const RoomNav = () => {
 
   const getStatus = () => {
     if (room.isGroup) return null;
+    if (!other) {
+      return;
+    }
     if (
       onlineUsers.filter((u) => u.id === other._id && u.status === "busy")
         .length > 0

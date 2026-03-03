@@ -18,33 +18,10 @@ function Picture({
     const baseClasses =
         "flex items-center justify-center rounded-full bg-gray-600 text-white overflow-hidden";
 
-    // if (group) {
-    //     if (picture) {
-    //         return (
-    //             <img
-    //                 src={`${configuration.url || ""}/api/images/${
-    //                     picture.shieldedID
-    //                 }/256`}
-    //                 alt="Group"
-    //                 className="rounded-full object-cover"
-    //                 style={{ width: size, height: size }}
-    //             />
-    //         );
-    //     }
-    //     return (
-    //         <div
-    //             className={baseClasses}
-    //             style={{ width: size, height: size, fontSize: size / 2 }}
-    //         >
-    //             {title.substr(0, 1).toUpperCase()}
-    //         </div>
-    //     );
-    // }
+    const firstName = user?.firstName || "User";
+    const lastName = user?.lastName || "Name";
 
-    const firstName = user.firstName || "User";
-    const lastName = user.lastName || "Name";
-
-    if (user.picture) {
+    if (user?.picture) {
         return (
             <img
                 src={`${configuration.url || ""}/api/image/${user.picture.shieldedID}`}
