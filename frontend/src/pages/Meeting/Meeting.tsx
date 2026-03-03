@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useDispatch";
 import { callEnded, setCallToken } from "@/features/call/callSlice";
@@ -28,221 +28,196 @@ const Meeting = () => {
     callStartTime,
     incoming,
   } = useAppSelector((s) => s.call);
-
   const user = useAppSelector((s) => s.auth.user);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  const adminDefaultPerMinPrice =
-    import.meta.env.VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
-
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const joinRef = useRef(false);
-
+  const adminDefaultPerMinPrice = import.meta.env
+    .VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
+  const intervalRef = useRef(null);
   const [liveKitUrl, setLiveKitUrl] = useState(
-    import.meta.env.VITE_LIVEKIT_URL || ""
+    import.meta.env.VITE_LIVEKIT_URL || "",
   );
 
-  /* ---------------- RESET JOIN WHEN ROOM CHANGES ---------------- */
-
   useEffect(() => {
-    joinRef.current = false;
-  }, [roomId]);
-
-  /* ---------------- JOIN ROOM SAFELY ---------------- */
-
-  useEffect(() => {
-    if (!callee || !user || !roomId || token || joinRef.current) return;
-
-    joinRef.current = true;
-
-    const join = async () => {
-      try {
-        const { data } = await API.post("/api/livekit/token", {
-          roomName: roomId,
-          userId: user._id,
-          calleeId: callee._id,
-        });
-
-        dispatch(setCallToken(data.token));
-
-        const { data: res } = await getLiveKitUser();
-        if (res?.success) {
-          setLiveKitUrl(res.data.url);
-        }
-      } catch (err) {
-        console.error("Join failed:", err);
-      }
-    };
-
-    join();
-  }, [callee, user, roomId, token, dispatch]);
-
-  /* ---------------- NAVIGATION SIDE EFFECT ---------------- */
-
-  useEffect(() => {
-    if (status === "idle") {
-      dispatch(callEnded());
-      navigate("/dashboard", { replace: true });
-    }
-  }, [status, dispatch, navigate]);
-
-  /* ---------------- HANDLE CALL END ---------------- */
-
-  const handleCallEnd = useCallback(async () => {
-    if (!caller || !callee || !user) return;
-
-    try {
-      await closeCall({
-        userID: caller._id === user._id ? callee._id : caller._id,
+    async function join() {
+      if (token) return;
+      const { data } = await API.post("/api/livekit/token", {
+        roomName: roomId,
+        userId: user._id,
+        calleeId: callee._id,
       });
-    } catch (err) {
-      console.error("closeCall failed:", err);
+      dispatch(setCallToken(data.token));
+
+      const { data: res } = await getLiveKitUser();
+      if (res.success) {
+        setLiveKitUrl(res.data.url);
+      }
+    }
+    join();
+  }, []);
+
+  useEffect(() => {
+    if (callStartTime) {
+      intervalRef.current = setInterval(() => {
+        const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
+        if (!incoming && user.type === "user" && callee.type === "Consultant") {
+          const price = callee.price || adminDefaultPerMinPrice;
+          const myPerSecPrice = parseFloat(price) / 60;
+          const myTotalCost = totalSeconds * myPerSecPrice;
+          const iHave = user.balance.amount - myTotalCost;
+          if (iHave < 2) {
+            handleDisconnect();
+            toast.success(
+              "Call ended due to insufficient balance. Please top up to continue calling.",
+            );
+            return totalSeconds; // stop increasing after ending
+          }
+        }
+      }, 1000);
     }
 
+    return () => clearInterval(intervalRef.current);
+  }, [callStartTime]);
+
+  const handleCallEnd = async () => {
+    await closeCall({
+      userID: caller._id === user._id ? callee._id : caller._id,
+    });
     dispatch(callEnded());
     navigate("/dashboard", { replace: true });
-  }, [caller, callee, user, dispatch, navigate]);
+    return;
+  };
 
-  /* ---------------- HANDLE DISCONNECT + BILLING ---------------- */
+  const handleDisconnect = async () => {
+    const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
 
-  const handleDisconnect = useCallback(async () => {
-    if (!callStartTime || !user || !caller || !callee) {
+    // charge system
+    if (
+      user.type === "root" ||
+      user.type === "admin" ||
+      callee.type === "root" ||
+      callee.type === "admin" ||
+      caller.type === "admin" ||
+      caller.type === "root"
+    ) {
+      // admin or root no charge
       return handleCallEnd();
     }
-
-    const totalSeconds = Math.floor(
-      (Date.now() - callStartTime) / 1000
-    );
-
-    const isAdminCall =
-      ["root", "admin"].includes(user.type) ||
-      ["root", "admin"].includes(callee.type) ||
-      ["root", "admin"].includes(caller.type);
-
-    if (isAdminCall) return handleCallEnd();
-
-    if (user.type === "Consultant" && caller.type === "Consultant")
+    if (user.type === "Consultant" && caller.type === "Consultant") {
+      // consultant to consultant call no charge
       return handleCallEnd();
-
-    if (user.type === "Consultant" && !incoming)
-      return handleCallEnd();
-
-    const price =
-      (user.type === "Consultant"
-        ? user.price
-        : callee.price) || adminDefaultPerMinPrice;
-
-    const perSecond = parseFloat(price) / 60;
-    const totalCost = parseFloat((totalSeconds * perSecond).toFixed(2));
-
-    if (totalCost <= 0) return handleCallEnd();
-
-    try {
-      const isUserPaying =
-        user.type === "user" && !incoming;
-
-      const myNewBalance = isUserPaying
-        ? user.balance.amount - totalCost
-        : user.balance.amount + totalCost;
-
-      dispatch(
-        updateUser({
-          balance: { amount: myNewBalance },
-        })
-      );
-
-      await updateMyBalance({
-        myId: user._id,
-        myHistory: {
-          historyType: "Call Charge",
-          amount: totalCost,
-          paymentMethod: isUserPaying ? "Decrease" : "Increase",
-          callDuration: totalSeconds,
-        },
-        myBalance: myNewBalance,
-      });
-
-    } catch (err) {
-      console.error("Balance update failed:", err);
     }
-
-    handleCallEnd();
-  }, [
-    callStartTime,
-    user,
-    caller,
-    callee,
-    incoming,
-    adminDefaultPerMinPrice,
-    handleCallEnd,
-  ]);
-
-  /* ---------------- BALANCE AUTO CUT ---------------- */
-
-  useEffect(() => {
-    if (!callStartTime || !user || !callee) return;
-
-    intervalRef.current = setInterval(() => {
-      const totalSeconds = Math.floor(
-        (Date.now() - callStartTime) / 1000
-      );
-
-      if (
-        !incoming &&
-        user.type === "user" &&
-        callee.type === "Consultant"
-      ) {
-        const price =
-          callee.price || adminDefaultPerMinPrice;
-
-        const perSecond = parseFloat(price) / 60;
-        const cost = totalSeconds * perSecond;
-
-        if (user.balance.amount - cost < 2) {
-          toast.success(
-            "Call ended due to insufficient balance."
+    if (user.type === "Consultant" && !incoming) {
+      console.log("hello");
+      // consultant call has no charge
+      return handleCallEnd();
+    }
+    if (user.type === "Consultant" && incoming && caller.type === "user") {
+      const price = user.price || adminDefaultPerMinPrice;
+      const myPerSecPrice = parseFloat(price) / 60;
+      const myTotalCost = totalSeconds * myPerSecPrice;
+      const myRoundedCost = parseFloat(myTotalCost.toFixed(2));
+      console.log(totalSeconds, myPerSecPrice, myRoundedCost);
+      const myHistory = {
+        historyType: "Call Charge",
+        amount: myRoundedCost,
+        paymentMethod: "Increased",
+        callDuration: totalSeconds,
+      };
+      const clientHistory = {
+        historyType: "Call Charge",
+        amount: myRoundedCost,
+        paymentMethod: "decrease",
+        callDuration: totalSeconds,
+      };
+      if (myRoundedCost > 0) {
+        try {
+          const data = {
+            myId: user._id,
+            myHistory,
+            myBalance: user.balance.amount + myRoundedCost,
+            clientId: caller._id,
+            clientHistory,
+            clientBalance: caller.balance.amount - myRoundedCost,
+          };
+          handleCallEnd();
+          dispatch(
+            updateUser({
+              balance: { amount: user.balance.amount + myRoundedCost },
+            }),
           );
-          handleDisconnect();
+          await updateMyBalance(data);
+        } catch (err) {
+          console.error("Failed to update balances:", err);
         }
       }
-    }, 1000);
+    }
+    // users related charge
+    if (user.type === "user" && incoming) {
+      // close the call without charge because user is receiver
+      return handleCallEnd();
+    }
+    if (user.type === "user" && !incoming && callee.type === "Consultant") {
+      const price = callee.price || adminDefaultPerMinPrice;
+      const myPerSecPrice = parseFloat(price) / 60;
+      const myTotalCost = totalSeconds * myPerSecPrice;
+      const myRoundedCost = parseFloat(myTotalCost.toFixed(2));
+      const myHistory = {
+        historyType: "Call Charge",
+        amount: myRoundedCost,
+        paymentMethod: "Decrease",
+        callDuration: totalSeconds,
+      };
+      const clientHistory = {
+        historyType: "Call Charge",
+        amount: myRoundedCost,
+        paymentMethod: "Increased",
+        callDuration: totalSeconds,
+      };
+      if (myRoundedCost > 0) {
+        try {
+          const data = {
+            myId: user._id,
+            myHistory,
+            myBalance: user.balance.amount - myRoundedCost,
+            clientId: callee._id,
+            clientHistory,
+            clientBalance: callee.balance.amount + myRoundedCost,
+          };
+          handleCallEnd();
+          dispatch(
+            updateUser({
+              balance: { amount: user.balance.amount - myRoundedCost },
+            }),
+          );
+          await updateMyBalance(data);
+        } catch (err) {
+          console.error("Failed to update balances:", err);
+        }
+      }
+    }
+  };
 
-    return () => {
-      if (intervalRef.current)
-        clearInterval(intervalRef.current);
-    };
-  }, [
-    callStartTime,
-    incoming,
-    user,
-    callee,
-    adminDefaultPerMinPrice,
-    handleDisconnect,
-  ]);
 
-  /* ---------------- RENDER STATES ---------------- */
-
-  if (status === "ringing" || status === "calling") {
-    return <Ringing />;
+  // 🔔 Incoming Call Screen
+  if (status === "ringing" || status === "calling") return <Ringing />;
+  if (status === "idle") {
+    dispatch(callEnded());
+    navigate("/dashboard", { replace: true });
+    return null;
   }
 
+  // 🔌 Connecting Screen
   if (!token) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen ">
         <div className="text-center animate-pulse">
-          <h1 className="text-2xl font-semibold">
-            Joining room…
-          </h1>
-          <p className="mt-2">
-            Setting up your audio and video
-          </p>
+          <h1 className="text-black text-2xl font-semibold">Joining room…</h1>
+          <p className="text-black mt-2">Setting up your audio and video</p>
         </div>
       </div>
     );
   }
-
-  /* ---------------- LIVEKIT ROOM ---------------- */
 
   return (
     <div className="w-full h-full text-white bg-black">
@@ -254,8 +229,7 @@ const Meeting = () => {
         video={type === "video"}
         onDisconnected={handleDisconnect}
         data-lk-theme="default"
-        style={{ height: "100%" }}
-      >
+        style={{ height: "100%" }}>
         <VideoConference />
         <RoomAudioRenderer />
         <ControlBar />

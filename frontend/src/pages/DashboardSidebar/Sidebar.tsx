@@ -67,6 +67,7 @@ const Sidebar = ({ className = "", setIsHome }) => {
             icon: <FiStar className="text-base" />,
         },
     ];
+    
     return (
         <div className={`flex flex-col ${className}`}>
             <TopBar

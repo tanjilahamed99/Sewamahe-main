@@ -71,7 +71,7 @@ function Settings() {
       });
       if (data.success) {
         toast.success(
-          `Withdrawal commission updated to ${commission}% successfully`
+          `Withdrawal commission updated to ${commission}% successfully`,
         );
       }
     } catch (error) {
@@ -90,7 +90,7 @@ function Settings() {
       });
       if (data.success) {
         toast.success(
-          `Recharge amount updated to ₹${rechargeAmount} successfully`
+          `Recharge amount updated to ₹${rechargeAmount} successfully`,
         );
       }
     } catch (error) {
@@ -116,7 +116,7 @@ function Settings() {
         toast.success(
           `${method === "paygic" ? "PayGic" : "Razorpay"} payment method ${
             updatedMethods[method] ? "enabled" : "disabled"
-          } successfully`
+          } successfully`,
         );
       }
     } catch (error) {
@@ -197,7 +197,7 @@ function Settings() {
     });
     if (data.success) {
       toast.success(
-        `Credited ₹${creditAmount} to ${selectedUser.firstName} ${selectedUser.lastName} successfully`
+        `Credited ₹${creditAmount} to ${selectedUser.firstName} ${selectedUser.lastName} successfully`,
       );
       setShowCreditModal(false);
       setSelectedUser(null);
@@ -638,9 +638,6 @@ function Settings() {
                         Name
                       </th>
                       <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">
-                        Username
-                      </th>
-                      <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">
                         Email
                       </th>
                       <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">
@@ -659,9 +656,6 @@ function Settings() {
                         className="hover:bg-gray-50 transition-colors">
                         <td className="py-3 px-4 text-sm text-gray-900">
                           {index + 1}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-900">
-                          @{user.username}
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">
                           {user.firstName} {user.lastName}
