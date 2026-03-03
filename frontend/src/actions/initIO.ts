@@ -1,6 +1,4 @@
 import {
-  addMessage,
-  addUnreadMessage,
   setOnlineUsers,
   setRooms,
 } from "@/features/chat/chatSlice";

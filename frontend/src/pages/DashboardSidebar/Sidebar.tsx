@@ -16,6 +16,7 @@ import Setting from "./Setting";
 import { FiMessageCircle, FiSearch, FiStar } from "react-icons/fi";
 import { SearchIcon } from "lucide-react";
 import { QualificationPopup } from "./components/QualificationPopup";
+import { disconnectSocket } from "@/lib/socket";
 
 
 const Sidebar = ({ className = "", setIsHome }) => {
@@ -35,6 +36,7 @@ const Sidebar = ({ className = "", setIsHome }) => {
         dispatch(logout());
         localStorage.removeItem("token")
         navigate("/login");
+        disconnectSocket()
     };
 
     useEffect(() => {
