@@ -47,6 +47,8 @@ const io = new Server(server, {
   cors: {
     origin: [
       "https://sewamahe.in",
+      "http://localhost:5173",
+      "https://sawamahe-frontend.vercel.app",
     ],
     credentials: true,
   },
@@ -66,6 +68,8 @@ app.use(
   cors({
     origin: [
       "https://sewamahe.in",
+      "http://localhost:5173",
+      "https://sawamahe-frontend.vercel.app",
     ],
     credentials: true,
   }),
