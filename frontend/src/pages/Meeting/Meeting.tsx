@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useDispatch";
 import { callEnded, setCallToken } from "@/features/call/callSlice";
 import API from "@/lib/axios";
+
 import {
   ControlBar,
   LiveKitRoom,
@@ -12,10 +13,9 @@ import {
 import "@livekit/components-styles";
 import Ringing from "./components/Ringing";
 import { closeCall } from "@/actions/call";
+import { toast } from "sonner";
 import { updateMyBalance } from "@/actions/history";
 import { updateUser } from "@/features/auth/authSlice";
-import { toast } from "sonner";
-import { getLiveKitUser } from "@/actions/admin";
 
 const Meeting = () => {
   const {
@@ -34,9 +34,7 @@ const Meeting = () => {
   const adminDefaultPerMinPrice = import.meta.env
     .VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
   const intervalRef = useRef(null);
-  const [liveKitUrl, setLiveKitUrl] = useState(
-    import.meta.env.VITE_LIVEKIT_URL || "",
-  );
+
 
   useEffect(() => {
     async function join() {
@@ -46,12 +44,8 @@ const Meeting = () => {
         userId: user._id,
         calleeId: callee._id,
       });
+      console.log(data);
       dispatch(setCallToken(data.token));
-
-      const { data: res } = await getLiveKitUser();
-      if (res.success) {
-        setLiveKitUrl(res.data.url);
-      }
     }
     join();
   }, []);
@@ -198,15 +192,13 @@ const Meeting = () => {
     }
   };
 
-  useEffect(() => {
-    if (status === "idle") {
-      dispatch(callEnded());
-      navigate("/dashboard", { replace: true });
-    }
-  }, [status]);
-
   // 🔔 Incoming Call Screen
   if (status === "ringing" || status === "calling") return <Ringing />;
+  if (status === "idle") {
+    dispatch(callEnded());
+    navigate("/dashboard", { replace: true });
+    return null;
+  }
 
   // 🔌 Connecting Screen
   if (!token) {
@@ -224,7 +216,7 @@ const Meeting = () => {
     <div className="w-full h-full text-white bg-black">
       <LiveKitRoom
         token={token}
-        serverUrl={liveKitUrl}
+        serverUrl={import.meta.env.VITE_LIVEKIT_URL}
         connect
         audio
         video={type === "video"}
