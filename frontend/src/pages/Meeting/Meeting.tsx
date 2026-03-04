@@ -197,14 +197,16 @@ const Meeting = () => {
       }
     }
   };
-  
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(callEnded());
+      navigate("/dashboard", { replace: true });
+    }
+  }, [status]);
+
   // 🔔 Incoming Call Screen
   if (status === "ringing" || status === "calling") return <Ringing />;
-  if (status === "idle") {
-    dispatch(callEnded());
-    navigate("/dashboard", { replace: true });
-    return null;
-  }
 
   // 🔌 Connecting Screen
   if (!token) {

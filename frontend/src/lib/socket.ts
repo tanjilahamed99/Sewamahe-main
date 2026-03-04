@@ -21,8 +21,8 @@ export const initSocket = (token: string) => {
 export const getSocket = () => socket;
 
 export const disconnectSocket = () => {
-  // if (socket) {
-  //   socket.disconnect();
-  //   socket = null;
-  // }
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };
