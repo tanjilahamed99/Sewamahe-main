@@ -35,16 +35,15 @@ const Meeting = () => {
     .VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
   const intervalRef = useRef(null);
 
-
   useEffect(() => {
     async function join() {
-      if (token) return;
+      if (token || incoming) return;
       const { data } = await API.post("/api/livekit/token", {
         roomName: roomId,
         userId: user._id,
         calleeId: callee._id,
       });
-      console.log(data);
+      console.log("generate token", data);
       dispatch(setCallToken(data.token));
     }
     join();
@@ -83,6 +82,8 @@ const Meeting = () => {
   };
 
   const handleDisconnect = async () => {
+    if (!callStartTime) return handleCallEnd();
+
     const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
 
     // charge system
@@ -220,7 +221,7 @@ const Meeting = () => {
         connect
         audio
         video={type === "video"}
-        onDisconnected={handleDisconnect}
+        onDisconnected={() => handleDisconnect()}
         data-lk-theme="default"
         style={{ height: "100%" }}>
         <VideoConference />

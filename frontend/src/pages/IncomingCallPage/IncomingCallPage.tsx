@@ -13,31 +13,31 @@ const IncomingCallPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    const audio = new Audio(ringSound);
-    audio.loop = true;
-    audio.play();
+  // useEffect(() => {
+  //   const audio = new Audio(ringSound);
+  //   audio.loop = true;
+  //   audio.play();
 
-    return () => audio.pause();
-  }, []);
+  //   return () => audio.pause();
+  // }, []);
 
-  const joinCall = async () => {
-    await answerCall({ userID: incoming ? call.caller._id : call.callee._id });
-  };
+  // const joinCall = async () => {
+  //   await answerCall({ userID: incoming ? call.caller._id : call.callee._id });
+  // };
 
-  const endCall = async () => {
-    await closeCall({ userID: incoming ? call.caller._id : call.callee._id });
-    dispatch(callEnded());
-    navigate(`/dashboard`);
-  };
+  // const endCall = async () => {
+  //   await closeCall({ userID: incoming ? call.caller._id : call.callee._id });
+  //   dispatch(callEnded());
+  //   navigate(`/dashboard`);
+  // };
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
 
-    if (params.get("autoAccept") === "true") {
-      answerCall({ userID: call.caller._id });
-    }
-  }, []);
+  //   if (params.get("autoAccept") === "true") {
+  //     answerCall({ userID: call.caller._id });
+  //   }
+  // }, []);
 
   if (!incoming) {
     return (
@@ -137,7 +137,7 @@ const IncomingCallPage = () => {
         <div className="flex items-center gap-12 animate-slide-up">
           {/* Reject Button - RED */}
           <button
-            onClick={endCall}
+            // onClick={endCall}
             className="group flex flex-col items-center justify-center">
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-2xl shadow-red-900/30 hover:shadow-red-900/50 transition-all duration-300 hover:scale-110 active:scale-95">
               <FiPhoneOff className="text-white text-4xl transform group-hover:rotate-12 transition-transform" />
@@ -151,7 +151,7 @@ const IncomingCallPage = () => {
           {/* Accept Button - GREEN */}
           {incoming && (
             <button
-              onClick={joinCall}
+              // onClick={joinCall}
               className="group flex flex-col items-center justify-center">
               <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl shadow-emerald-900/40 hover:shadow-emerald-900/60 transition-all duration-300 hover:scale-110 active:scale-95">
                 <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
