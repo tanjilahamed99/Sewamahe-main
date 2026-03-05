@@ -4,16 +4,16 @@ import IO from "socket.io-client";
 let socket = null;
 export const initSocket = (token: string) => {
   if (!socket) {
-    socket = IO("sewamahe.in", {
-        auth: { token },
-        transports: ["websocket"],
-        withCredentials: true,
-    });
-    // socket = IO(configuration.url, {
-    //   auth: { token },
-    //   transports: ["websocket"],
-    //   withCredentials: true,
+    // socket = IO("sewamahe.in", {
+    //     auth: { token },
+    //     transports: ["websocket"],
+    //     withCredentials: true,
     // });
+    socket = IO(configuration.url, {
+      auth: { token },
+      transports: ["websocket"],
+      withCredentials: true,
+    });
   }
   return socket;
 };
@@ -21,8 +21,8 @@ export const initSocket = (token: string) => {
 export const getSocket = () => socket;
 
 export const disconnectSocket = () => {
-  // if (socket) {
-  //   socket.disconnect();
-  //   socket = null;
-  // }
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };

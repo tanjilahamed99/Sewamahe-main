@@ -20,6 +20,7 @@ module.exports.pushNotification = async (data = {}) => {
     },
   };
 
+
   try {
     const res = await admin.messaging().send(message);
     console.log("✅ Push notification sent");
