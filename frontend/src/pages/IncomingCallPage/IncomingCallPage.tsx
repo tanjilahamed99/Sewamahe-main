@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useDispatch";
-import ringSound from "@/assets/ring.mp3";
 import Picture from "@/components/Picture";
 import { FiPhone, FiPhoneOff, FiVideo } from "react-icons/fi";
 import { answerCall, closeCall } from "@/actions/call";
-import { callEnded } from "@/features/call/callSlice";
+import { callEnded, incomingCall } from "@/features/call/callSlice";
+import { store } from "@/store";
 
 const IncomingCallPage = () => {
   const call = useAppSelector((s) => s.call);
@@ -13,36 +13,31 @@ const IncomingCallPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  // useEffect(() => {
-  //   const audio = new Audio(ringSound);
-  //   audio.loop = true;
-  //   audio.play();
+  useEffect(() => {
+    if (!navigator.serviceWorker) return;
 
-  //   return () => audio.pause();
-  // }, []);
-
-  // const joinCall = async () => {
-  //   await answerCall({ userID: incoming ? call.caller._id : call.callee._id });
-  // };
-
-  // const endCall = async () => {
-  //   await closeCall({ userID: incoming ? call.caller._id : call.callee._id });
-  //   dispatch(callEnded());
-  //   navigate(`/dashboard`);
-  // };
-
-  // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-
-  //   if (params.get("autoAccept") === "true") {
-  //     answerCall({ userID: call.caller._id });
-  //   }
-  // }, []);
+    navigator.serviceWorker.addEventListener("message", async (event) => {
+      if (event.data?.type === "INCOMING_CALL") {
+        const data = {
+          status: 200,
+          room: JSON.parse(event.data.payload.room),
+          meetingID: event.data.payload.meetingID,
+          roomID: event.data.payload.roomID,
+          type: "audio",
+          caller: JSON.parse(event.data.payload.caller),
+          callee: JSON.parse(event.data.payload.callee),
+        };
+        const caller = JSON.parse(event.data.payload.caller);
+        store.dispatch(incomingCall(data));
+        await answerCall({ userID: caller._id });
+      }
+    });
+  }, []);
 
   if (!incoming) {
     return (
       <div className="flex justify-center items-center h-[100vh] text-xl font-bold">
-        No user found
+       Call Connection Started
       </div>
     );
   }
@@ -122,165 +117,7 @@ const IncomingCallPage = () => {
           {/* Live Status Dot */}
           <div className="absolute bottom-4 right-4 w-6 h-6 bg-green-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
         </div>
-
-        {/* Caller Name */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-white mb-2 animate-fade-in">
-            {incoming ? call.caller.fullName : call.callee.fullName}
-          </h1>
-          <p className="text-gray-400 text-lg animate-fade-in-delay">
-            {incoming ? "is calling you..." : "Ringing..."}
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-12 animate-slide-up">
-          {/* Reject Button - RED */}
-          <button
-            // onClick={endCall}
-            className="group flex flex-col items-center justify-center">
-            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-2xl shadow-red-900/30 hover:shadow-red-900/50 transition-all duration-300 hover:scale-110 active:scale-95">
-              <FiPhoneOff className="text-white text-4xl transform group-hover:rotate-12 transition-transform" />
-            </div>
-            <span className="mt-4 text-white font-semibold text-lg">
-              Reject
-            </span>
-            <span className="text-gray-400 text-sm">Press or swipe down</span>
-          </button>
-
-          {/* Accept Button - GREEN */}
-          {incoming && (
-            <button
-              // onClick={joinCall}
-              className="group flex flex-col items-center justify-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl shadow-emerald-900/40 hover:shadow-emerald-900/60 transition-all duration-300 hover:scale-110 active:scale-95">
-                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
-                  <FiPhone className="text-white text-5xl transform group-hover:scale-110 transition-transform" />
-                </div>
-              </div>
-              <span className="mt-4 text-white font-semibold text-lg">
-                Accept
-              </span>
-              <span className="text-gray-400 text-sm">Press or swipe up</span>
-            </button>
-          )}
-        </div>
-
-        {/* Volume Indicator */}
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse" />
-            <div
-              className="w-3 h-3 bg-gray-500 rounded-full animate-pulse"
-              style={{ animationDelay: "0.1s" }}
-            />
-            <div
-              className="w-4 h-4 bg-gray-400 rounded-full animate-pulse"
-              style={{ animationDelay: "0.2s" }}
-            />
-            <div
-              className="w-3 h-3 bg-gray-500 rounded-full animate-pulse"
-              style={{ animationDelay: "0.3s" }}
-            />
-            <div
-              className="w-2 h-2 bg-gray-600 rounded-full animate-pulse"
-              style={{ animationDelay: "0.4s" }}
-            />
-          </div>
-        </div>
       </div>
-
-      {/* Custom Animations */}
-      <style>{`
-      @keyframes pulse {
-        0%, 100% {
-          transform: scale(1);
-          opacity: 0.1;
-        }
-        50% {
-          transform: scale(1.1);
-          opacity: 0.3;
-        }
-      }
-  
-      @keyframes spin-slow {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-  
-      @keyframes float {
-        0%, 100% {
-          transform: translateY(0) translateX(0);
-        }
-        33% {
-          transform: translateY(-10px) translateX(10px);
-        }
-        66% {
-          transform: translateY(10px) translateX(-10px);
-        }
-      }
-  
-      @keyframes bounce-slow {
-        0%, 100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-10px);
-        }
-      }
-  
-      @keyframes fade-in {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-  
-      @keyframes slide-up {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-  
-      .animate-spin-slow {
-        animation: spin-slow 20s linear infinite;
-      }
-  
-      .animate-float {
-        animation: float 3s ease-in-out infinite;
-      }
-  
-      .animate-bounce-slow {
-        animation: bounce-slow 2s ease-in-out infinite;
-      }
-  
-      .animate-fade-in {
-        animation: fade-in 0.8s ease-out forwards;
-      }
-  
-      .animate-fade-in-delay {
-        animation: fade-in 0.8s ease-out 0.3s forwards;
-        opacity: 0;
-      }
-  
-      .animate-slide-up {
-        animation: slide-up 0.8s ease-out 0.5s forwards;
-        opacity: 0;
-      }
-    `}</style>
     </div>
   );
 };

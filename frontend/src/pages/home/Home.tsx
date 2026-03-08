@@ -30,46 +30,13 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "@/hooks/useDispatch";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getToken, onMessage } from "firebase/messaging";
-import { generateToken, messaging } from "@/config/firebase";
-import { saveFcmToken } from "@/actions/auth";
-import { updateUser } from "@/features/auth/authSlice";
+
 
 export const Home = () => {
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
-  const user = useAppSelector((state) => state.auth.user);
-  const dispatch = useAppDispatch();
 
-  const requestPermission = async () => {
-    try {
-      const token = await getToken(messaging, {
-        vapidKey:
-          "BLD3Wqd3EoWKHZOx0x0RfQs3QSFgCB4_kIcG1RzsHfP6LhPQfqEHwCaYtMz4LKtmjOknpEOAPP3MhvkiMWsq6PI",
-      });
-
-      if (token) {
-        if (user) {
-          // send backend to same fcm token
-          dispatch(
-            updateUser({
-              fcmToken: token,
-            })
-          );
-          await saveFcmToken({
-            userId: user._id,
-            fcmToken: token,
-          });
-        }
-      }
-
-      await generateToken();
-    } catch (err) {
-      console.error("Permission denied", err);
-    }
-  };
 
   const features = [
     {
@@ -282,12 +249,6 @@ export const Home = () => {
     { value: "24/7", label: "Support Availability", icon: <Headphones /> },
   ];
 
-  useEffect(() => {
-    requestPermission();
-    onMessage(messaging, (payload) => {
-      // console.log(payload);
-    });
-  }, []);
 
   return (
     <div className="min-h-screen bg-white">

@@ -9,15 +9,16 @@ importScripts(
 
 // 🔥 Firebase Init
 firebase.initializeApp({
-  apiKey: "AIzaSyB6kx9GkraG5U4xoPNPv62MrKPTNbdcmLk",
-  authDomain: "sewamahe-dd4c2.firebaseapp.com",
-  projectId: "sewamahe-dd4c2",
-  storageBucket: "sewamahe-dd4c2.firebasestorage.app",
-  messagingSenderId: "398089760302",
-  appId: "1:398089760302:web:f8a786affb3e936d42b9bf",
+  apiKey: "AIzaSyDPBFv-jorDEwQqtDLv6pKVtSIl1ljHrVU",
+  authDomain: "sewamahe-fa6f5.firebaseapp.com",
+  projectId: "sewamahe-fa6f5",
+  storageBucket: "sewamahe-fa6f5.firebasestorage.app",
+  messagingSenderId: "841071972020",
+  appId: "1:841071972020:web:9cda360b4bbfcfbb2991e1",
+  measurementId: "G-E12ZZ18J7R",
 });
 
-// 🔥 Messaging Instance
+// 🔥 Messaging Instance 
 const messaging = firebase.messaging();
 
 /**
@@ -31,7 +32,7 @@ messaging.onBackgroundMessage((payload) => {
   const data = payload.data;
   const { type } = data;
 
-  // console.log("[SW] BG Payload:", data);
+  console.log("[SW] BG Payload:", data);
 
   // 🟢 CALL NOTIFICATION
   if (type === "call") {
@@ -81,8 +82,6 @@ self.addEventListener("notificationclick", (event) => {
 
   const data = event.notification.data || {};
   const action = event.action;
-
-  console.log(data);
 
   event.waitUntil(
     (async () => {
