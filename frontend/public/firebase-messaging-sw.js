@@ -37,7 +37,7 @@ messaging.onBackgroundMessage((payload) => {
   // 🟢 CALL NOTIFICATION
   if (type === "call") {
     self.registration.showNotification("Incoming Call", {
-      body: `${data.callerName} is calling you`,
+      body: `${data.title}`,
       icon: "/call.png",
       tag: "incoming-call",
       requireInteraction: true,

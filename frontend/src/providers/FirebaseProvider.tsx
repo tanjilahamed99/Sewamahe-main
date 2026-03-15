@@ -66,6 +66,20 @@ const FirebaseProvider = ({ children }) => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    if (
+      typeof window !== "undefined" &&
+      window.flutter_inappwebview &&
+      window.flutter_inappwebview.callHandler
+    ) {
+      window.flutter_inappwebview.callHandler("userAuth", {
+        userId: user._id,
+      });
+    }
+  }, [user]);
+
   return children;
 };
 

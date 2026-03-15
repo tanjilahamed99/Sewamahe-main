@@ -12,7 +12,7 @@ import { initSocket } from "@/lib/socket";
 import {
   callAccepted,
   callEnded,
-  incomingCall,
+incomingCall,
   setCallToken,
 } from "@/features/call/callSlice";
 
