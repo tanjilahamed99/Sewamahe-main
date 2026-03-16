@@ -62,7 +62,7 @@ const FirebaseProvider = ({ children }) => {
   useEffect(() => {
     requestPermission();
     onMessage(messaging, (payload) => {
-      // console.log(payload);
+      console.log(payload);
     });
   }, []);
 

@@ -45,8 +45,8 @@ export const Calling = async ({
     return toast.warning("You are unverified consultant");
 
   // if user online then call other wise offline message show
-  if (onlineUsers.filter((u) => u.id === other._id).length === 0)
-    return toast.warning("User is offline!");
+  // if (onlineUsers.filter((u) => u.id === other._id).length === 0)
+  //   return toast.warning("User is offline!");
 
   const type = isVideo ? "video" : "audio";
   dispatch(

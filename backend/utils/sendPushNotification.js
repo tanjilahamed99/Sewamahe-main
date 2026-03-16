@@ -21,11 +21,7 @@ module.exports.pushNotification = async (data = {}) => {
     },
 
     android: {
-      priority: "high",
-      notification: {
-        sound: "default",
-        channelId: "default",
-      },
+      priority: "high"
     },
 
     webpush: {
