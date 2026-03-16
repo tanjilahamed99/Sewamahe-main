@@ -42,6 +42,7 @@ const Sidebar = ({ className = "", setIsHome }) => {
     ) {
       window.flutter_inappwebview.callHandler("userAuth", {
         userId: null,
+        token: null
       });
     }
 

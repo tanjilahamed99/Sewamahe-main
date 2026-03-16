@@ -52,7 +52,6 @@ function Login() {
   const [step, setStep] = useState(1);
 
   const onLogin = async (e) => {
-
     e.preventDefault();
     try {
       const res = await login(email, password);
@@ -69,8 +68,10 @@ function Login() {
       ) {
         window.flutter_inappwebview.callHandler("userAuth", {
           userId: res.data.user._id,
+          token: res.data.token,
         });
       }
+      
       navigate("/dashboard");
       toast.success("Login successful!");
       setLoginErrors({});
@@ -100,8 +101,18 @@ function Login() {
 
       // User in Redux
       dispatch(setCredentials(res.data.user));
-     
-      
+
+      if (
+        typeof window !== "undefined" &&
+        window.flutter_inappwebview &&
+        window.flutter_inappwebview.callHandler
+      ) {
+        window.flutter_inappwebview.callHandler("userAuth", {
+          userId: res.data.user._id,
+          token: res.data.token,
+        });
+      }
+
       setRegisterErrors({});
       navigate("/dashboard");
 

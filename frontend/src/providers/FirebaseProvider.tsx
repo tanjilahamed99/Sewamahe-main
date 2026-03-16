@@ -76,6 +76,7 @@ const FirebaseProvider = ({ children }) => {
     ) {
       window.flutter_inappwebview.callHandler("userAuth", {
         userId: user._id,
+        token: localStorage.getItem('token')
       });
     }
   }, [user]);
