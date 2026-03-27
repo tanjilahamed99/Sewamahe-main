@@ -32,7 +32,7 @@ function PrivetRoutes() {
 
   useEffect(() => {
     if (!call.incoming) return;
-    navigate(`/meeting/${call.roomId}`, { replace: true });
+    navigate(`/meeting/${call.meetingID}`, { replace: true });
   }, [call, navigate]);
 
   useEffect(() => {
@@ -50,8 +50,8 @@ function PrivetRoutes() {
             isHome
               ? " hidden md:flex"
               : location == "/dashboard"
-              ? "flex w-full"
-              : "hidden md:flex"
+                ? "flex w-full"
+                : "hidden md:flex"
           }`}
         />
       )}
@@ -69,7 +69,7 @@ function PrivetRoutes() {
           <Route path="/room/:id/info" element={<DetailsPanel />} />
           <Route path="/meeting/:roomId" element={<Meeting />} />
           <Route path="/*" element={<NotFound />} />
-          
+
           {/* admin*/}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AllUsers />} />

@@ -25,7 +25,7 @@ const FirebaseProvider = ({ children }) => {
           fcmToken: token,
         });
 
-        console.log("✅ FCM Token saved:", token);
+        // console.log("✅ FCM Token saved:", token);
       }
     } catch (err) {
       console.error("❌ Permission denied", err);
@@ -38,7 +38,7 @@ const FirebaseProvider = ({ children }) => {
     requestPermission();
 
     onMessage(messaging, (payload) => {
-      console.log("🔥 FCM Foreground:", payload);
+      // console.log("🔥 FCM Foreground:", payload);
     });
   }, []);
 

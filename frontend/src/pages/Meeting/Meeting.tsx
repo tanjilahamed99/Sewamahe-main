@@ -35,9 +35,6 @@ const Meeting = () => {
     .VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
   const intervalRef = useRef(null);
 
-console.log('Meeting callee:', callee); // Should now be object
-console.log('Callee _id:', callee._id); // ✅ 
-
   useEffect(() => {
     async function join() {
       try {
@@ -119,7 +116,6 @@ console.log('Callee _id:', callee._id); // ✅
       const myPerSecPrice = parseFloat(price) / 60;
       const myTotalCost = totalSeconds * myPerSecPrice;
       const myRoundedCost = parseFloat(myTotalCost.toFixed(2));
-      console.log(totalSeconds, myPerSecPrice, myRoundedCost);
       const myHistory = {
         historyType: "Call Charge",
         amount: myRoundedCost,
@@ -206,6 +202,10 @@ console.log('Callee _id:', callee._id); // ✅
     dispatch(callEnded());
     navigate("/dashboard", { replace: true });
     return null;
+  }
+
+  if (!callee) {
+    navigate("/dashboard");
   }
 
   // 🔌 Connecting Screen
