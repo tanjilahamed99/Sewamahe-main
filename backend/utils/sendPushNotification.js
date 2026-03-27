@@ -15,11 +15,6 @@ module.exports.pushNotification = async (data = {}) => {
       ...data,
     },
 
-    notification: {
-      title: title || "New Notification",
-      body: body || "You have a new message",
-    },
-
     android: {
       priority: "high"
     },
