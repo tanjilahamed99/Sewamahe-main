@@ -31,11 +31,6 @@ function PrivetRoutes() {
   const call = useAppSelector((state) => state.call);
 
   useEffect(() => {
-    if (!call.incoming) return;
-    navigate(`/meeting/${call.meetingID}`, { replace: true });
-  }, [call, navigate]);
-
-  useEffect(() => {
     if (!user) {
       navigate("/login");
     }

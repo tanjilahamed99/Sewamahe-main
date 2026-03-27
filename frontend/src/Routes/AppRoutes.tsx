@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { Home } from "../pages/home/Home";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
@@ -12,15 +12,23 @@ import { useAppSelector } from "@/hooks/useDispatch";
 import { useEffect } from "react";
 import initIO from "@/actions/initIO";
 import FirebaseProvider from "@/providers/FirebaseProvider";
-import IncomingCallPage from '@/pages/IncomingCallPage/IncomingCallPage'
+import IncomingCallPage from "@/pages/IncomingCallPage/IncomingCallPage";
 
 export const AppRoutes = () => {
   const user = useAppSelector((state) => state.auth.user);
   const token = localStorage.getItem("token");
+  const call = useAppSelector((state) => state.call);
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!token || !user) return;
     initIO(token);
   }, [token, user]);
+
+  useEffect(() => {
+    if (!call.incoming && user) return;
+    navigate(`/meeting/${call.meetingID}`, { replace: true });
+  }, [call, navigate]);
 
   return (
     <Routes>
