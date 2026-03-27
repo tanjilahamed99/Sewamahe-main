@@ -35,16 +35,23 @@ const Meeting = () => {
     .VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
   const intervalRef = useRef(null);
 
+console.log('Meeting callee:', callee); // Should now be object
+console.log('Callee _id:', callee._id); // ✅ 
+
   useEffect(() => {
     async function join() {
-      if (token || incoming) return;
-      const { data } = await API.post("/api/livekit/token", {
-        roomName: roomId,
-        userId: user._id,
-        calleeId: callee._id,
-      });
-      console.log("generate token", data);
-      dispatch(setCallToken(data.token));
+      try {
+        if (token) return;
+        const { data } = await API.post("/api/livekit/token", {
+          roomName: roomId,
+          userId: user._id,
+          calleeId: callee._id,
+        });
+        console.log("generate token", data);
+        dispatch(setCallToken(data.token));
+      } catch (error) {
+        console.log(error);
+      }
     }
     join();
   }, []);
