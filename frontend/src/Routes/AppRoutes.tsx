@@ -25,10 +25,10 @@ export const AppRoutes = () => {
     initIO(token);
   }, [token, user]);
 
-  useEffect(() => {
-    if (!call.incoming && user) return;
-    navigate(`/meeting/${call.meetingID}`, { replace: true });
-  }, [call, navigate]);
+  // useEffect(() => {
+  //   if (!call.incoming && user) return;
+  //   navigate(`/meeting/${call.meetingID}`, { replace: true });
+  // }, [call, navigate]);
 
   return (
     <Routes>
@@ -90,7 +90,7 @@ export const AppRoutes = () => {
       <Route path="*" element={<NotFound />} />
 
       {/* app related route */}
-      <Route path="/call/ringing" element={<IncomingCallPage />} />
+      <Route path="/callStatus" element={<IncomingCallPage />} />
     </Routes>
   );
 };

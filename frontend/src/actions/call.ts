@@ -17,6 +17,7 @@ export const closeCall = async ({ userID }) => {
   const res = await API.post("/api/meeting/close", { userID });
   return res.data;
 };
+
 export const Calling = async ({
   isVideo,
   user,
@@ -27,7 +28,6 @@ export const Calling = async ({
   room,
   navigate,
 }) => {
-
   if (user?.balance.amount <= 4 && user.type === "user")
     return toast.warning(
       "You have less then 5 rupe to make calls. Please top up your account.",
@@ -68,4 +68,9 @@ export const Calling = async ({
   } catch (e) {
     toast.error("Server error. Unable to initiate call.");
   }
+};
+
+export const getCustomCallData = async (meetingID) => {
+  const res = await API.get(`/api/meeting/customCallData/${meetingID}`);
+  return res.data;
 };
