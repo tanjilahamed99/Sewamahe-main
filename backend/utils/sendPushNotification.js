@@ -1,7 +1,7 @@
 const admin = require("firebase-admin");
 
 module.exports.pushNotification = async (data = {}) => {
-  const { token, title, body } = data;
+  const { token } = data;
 
   if (!token) {
     console.log("No FCM token");

@@ -1,12 +1,13 @@
-
 const jwt = require("jsonwebtoken");
 const store = require("./store");
 const User = require("./models/User");
 
 module.exports = () => {
 
-  // userId -> Set(socketIds)
-  store.onlineUsers = new Map();
+  // Initialize only if not already a Map (prevents reset on re-require)
+  if (!(store.onlineUsers instanceof Map)) {
+    store.onlineUsers = new Map();
+  }
 
   // =========================
   // AUTH MIDDLEWARE
@@ -22,7 +23,7 @@ module.exports = () => {
       const payload = jwt.verify(token, store.config.secret);
 
       socket.user = payload;
-      socket.userId = payload.id; // store directly for safety
+      socket.userId = payload.id;
 
       next();
     } catch (err) {
@@ -42,8 +43,8 @@ module.exports = () => {
     // join personal room
     socket.join(userId);
 
-    // if user not exist create new set
-    if (!store.onlineUsers.has(userId)) {
+    // Guard: only set if it doesn't exist OR if it's not a Set
+    if (!(store.onlineUsers.get(userId) instanceof Set)) {
       store.onlineUsers.set(userId, new Set());
     }
 
@@ -77,7 +78,8 @@ module.exports = () => {
 
       const sockets = store.onlineUsers.get(userId);
 
-      if (!sockets) return;
+      // Guard: ensure it's actually a Set before calling .delete()
+      if (!sockets || !(sockets instanceof Set)) return;
 
       // remove this socket
       sockets.delete(socket.id);
