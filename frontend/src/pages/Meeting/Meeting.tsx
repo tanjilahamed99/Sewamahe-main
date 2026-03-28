@@ -35,12 +35,11 @@ const Meeting = () => {
   const callStatus = localStorage.getItem("callStatus");
   const callTime = localStorage.getItem("callStartTime");
 
-  console.log(callTime);
-
   useEffect(() => {
     async function join() {
       try {
         if (token) return;
+        if (!callee) return;
         const { data } = await API.post("/api/livekit/token", {
           roomName: roomId,
           userId: user._id,

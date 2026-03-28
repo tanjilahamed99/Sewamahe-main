@@ -5,8 +5,14 @@ import { FiPhone, FiPhoneOff, FiVideo } from "react-icons/fi";
 import { answerCall, closeCall, getCustomCallData } from "@/actions/call";
 import { callEnded, incomingCall } from "@/features/call/callSlice";
 import { store } from "@/store";
+import { useDispatch } from "react-redux";
 
-type LoadingStage = "idle" | "fetching" | "connecting" | "redirecting" | "error";
+type LoadingStage =
+  | "idle"
+  | "fetching"
+  | "connecting"
+  | "redirecting"
+  | "error";
 
 const IncomingCallPage = () => {
   const call = useAppSelector((s) => s.call);
@@ -20,10 +26,15 @@ const IncomingCallPage = () => {
 
   const meetingID = searchParams.get("meetingID");
   const action = searchParams.get("action");
+  const dispatch = useDispatch();
 
   // Animated dots
   useEffect(() => {
-    if (stage === "fetching" || stage === "connecting" || stage === "redirecting") {
+    if (
+      stage === "fetching" ||
+      stage === "connecting" ||
+      stage === "redirecting"
+    ) {
       const interval = setInterval(() => setDots((d) => (d + 1) % 4), 400);
       return () => clearInterval(interval);
     }
@@ -37,16 +48,23 @@ const IncomingCallPage = () => {
           const data = await getCustomCallData(meetingID);
 
           if (data.status === 200) {
-            setCallerData(data.caller);
-            store.dispatch(incomingCall(data));
-
-            setStage("connecting");
-            await answerCall({ userID: data.caller._id });
-            localStorage.setItem("callStartTime", Date.now());
-            setStage("redirecting");
-            setTimeout(() => {
-              navigate(`/meeting/${meetingID}`, { replace: true });
-            }, 800);
+            if (action === "cancel") {
+              await closeCall({
+                userID: data.caller._id,
+              });
+              dispatch(callEnded());
+              return navigate(`/dashboard`);
+            } else if(action === 'accept'){
+              setCallerData(data.caller);
+              store.dispatch(incomingCall(data));
+              setStage("connecting");
+              await answerCall({ userID: data.caller._id });
+              localStorage.setItem("callStartTime", Date.now());
+              setStage("redirecting");
+              setTimeout(() => {
+                navigate(`/meeting/${meetingID}`, { replace: true });
+              }, 800);
+            }
           }
         } catch (error: any) {
           setStage("error");
@@ -79,10 +97,10 @@ const IncomingCallPage = () => {
     <div
       className="relative min-h-screen w-full flex items-center justify-center overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0f1a 100%)",
+        background:
+          "linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0f1a 100%)",
         fontFamily: "'DM Sans', sans-serif",
-      }}
-    >
+      }}>
       {/* Ambient glow blobs */}
       <div
         style={{
@@ -92,7 +110,8 @@ const IncomingCallPage = () => {
           width: 320,
           height: 320,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)",
           filter: "blur(40px)",
           animation: "pulse 4s ease-in-out infinite",
         }}
@@ -105,7 +124,8 @@ const IncomingCallPage = () => {
           width: 280,
           height: 280,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)",
           filter: "blur(40px)",
           animation: "pulse 5s ease-in-out infinite 1.5s",
         }}
@@ -132,8 +152,7 @@ const IncomingCallPage = () => {
           margin: "0 auto",
           padding: "0 20px",
           zIndex: 10,
-        }}
-      >
+        }}>
         <div
           style={{
             background: "rgba(255,255,255,0.03)",
@@ -141,12 +160,17 @@ const IncomingCallPage = () => {
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 24,
             padding: "40px 36px",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+            boxShadow:
+              "0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
             animation: "slideUp 0.5s cubic-bezier(0.16,1,0.3,1)",
-          }}
-        >
+          }}>
           {/* Status badge */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 32,
+            }}>
             <div
               style={{
                 display: "inline-flex",
@@ -162,8 +186,7 @@ const IncomingCallPage = () => {
                   stage === "error"
                     ? "1px solid rgba(239,68,68,0.25)"
                     : "1px solid rgba(59,130,246,0.25)",
-              }}
-            >
+              }}>
               <span
                 style={{
                   width: 7,
@@ -171,7 +194,10 @@ const IncomingCallPage = () => {
                   borderRadius: "50%",
                   background: stage === "error" ? "#ef4444" : "#3b82f6",
                   display: "inline-block",
-                  animation: stage !== "error" ? "blink 1.2s ease-in-out infinite" : "none",
+                  animation:
+                    stage !== "error"
+                      ? "blink 1.2s ease-in-out infinite"
+                      : "none",
                 }}
               />
               <span
@@ -181,15 +207,19 @@ const IncomingCallPage = () => {
                   color: stage === "error" ? "#f87171" : "#93c5fd",
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
-                }}
-              >
+                }}>
                 {action === "accept" ? "Incoming Call" : "Call Status"}
               </span>
             </div>
           </div>
 
           {/* Avatar */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 24,
+            }}>
             <div style={{ position: "relative" }}>
               {/* Ripple rings */}
               {(stage === "fetching" || stage === "connecting") && (
@@ -216,8 +246,7 @@ const IncomingCallPage = () => {
                   position: "relative",
                   zIndex: 2,
                   boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                }}
-              >
+                }}>
                 {!callerData?.picture && (
                   <span>
                     {callerData
@@ -242,8 +271,7 @@ const IncomingCallPage = () => {
                   alignItems: "center",
                   justifyContent: "center",
                   zIndex: 3,
-                }}
-              >
+                }}>
                 <FiVideo size={13} color="#fff" />
               </div>
             </div>
@@ -260,21 +288,19 @@ const IncomingCallPage = () => {
                 letterSpacing: "-0.02em",
                 minHeight: 28,
                 transition: "all 0.3s",
-              }}
-            >
+              }}>
               {callerData
                 ? `${callerData.firstName} ${callerData.lastName}`
                 : stage === "error"
-                ? "Unknown Caller"
-                : "\u00A0"}
+                  ? "Unknown Caller"
+                  : "\u00A0"}
             </h2>
             <p
               style={{
                 fontSize: 13,
                 color: "rgba(148,163,184,0.7)",
                 letterSpacing: "0.01em",
-              }}
-            >
+              }}>
               {callerData?.type || (stage !== "error" ? "\u00A0" : "")}
             </p>
           </div>
@@ -290,8 +316,7 @@ const IncomingCallPage = () => {
                   borderRadius: 100,
                   overflow: "hidden",
                   marginBottom: 12,
-                }}
-              >
+                }}>
                 <div
                   style={{
                     height: "100%",
@@ -310,62 +335,58 @@ const IncomingCallPage = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                }}
-              >
-                {(["fetching", "connecting", "redirecting"] as LoadingStage[]).map(
-                  (s, i) => {
-                    const isActive = stage === s;
-                    const isDone =
-                      stageProgress[stage] > stageProgress[s];
-                    return (
+                }}>
+                {(
+                  ["fetching", "connecting", "redirecting"] as LoadingStage[]
+                ).map((s, i) => {
+                  const isActive = stage === s;
+                  const isDone = stageProgress[stage] > stageProgress[s];
+                  return (
+                    <div
+                      key={s}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 5,
+                      }}>
                       <div
-                        key={s}
                         style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            background: isDone
-                              ? "#3b82f6"
-                              : isActive
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          background: isDone
+                            ? "#3b82f6"
+                            : isActive
                               ? "#8b5cf6"
                               : "rgba(255,255,255,0.12)",
-                            transition: "background 0.4s",
-                            boxShadow: isActive
-                              ? "0 0 8px rgba(139,92,246,0.8)"
-                              : "none",
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontSize: 10,
-                            color: isDone
-                              ? "#60a5fa"
-                              : isActive
+                          transition: "background 0.4s",
+                          boxShadow: isActive
+                            ? "0 0 8px rgba(139,92,246,0.8)"
+                            : "none",
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: isDone
+                            ? "#60a5fa"
+                            : isActive
                               ? "#c4b5fd"
                               : "rgba(148,163,184,0.35)",
-                            letterSpacing: "0.04em",
-                            textTransform: "uppercase",
-                            transition: "color 0.4s",
-                          }}
-                        >
-                          {s === "fetching"
-                            ? "Fetch"
-                            : s === "connecting"
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                          transition: "color 0.4s",
+                        }}>
+                        {s === "fetching"
+                          ? "Fetch"
+                          : s === "connecting"
                             ? "Connect"
                             : "Join"}
-                        </span>
-                      </div>
-                    );
-                  }
-                )}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Status text */}
@@ -377,8 +398,7 @@ const IncomingCallPage = () => {
                   color: "rgba(148,163,184,0.6)",
                   letterSpacing: "0.01em",
                   minHeight: 20,
-                }}
-              >
+                }}>
                 {stageLabel[stage]}
                 {(stage === "fetching" ||
                   stage === "connecting" ||
@@ -396,8 +416,7 @@ const IncomingCallPage = () => {
                 border: "1px solid rgba(239,68,68,0.2)",
                 borderRadius: 12,
                 textAlign: "center",
-              }}
-            >
+              }}>
               <p style={{ fontSize: 13, color: "#f87171", lineHeight: 1.5 }}>
                 {errorMsg}
               </p>
@@ -424,8 +443,7 @@ const IncomingCallPage = () => {
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background =
                   "rgba(239,68,68,0.12)";
-              }}
-            >
+              }}>
               <FiPhoneOff size={18} />
               <span>Decline</span>
             </button>
@@ -442,12 +460,9 @@ const IncomingCallPage = () => {
                 color: "rgba(148,163,184,0.4)",
                 cursor: "default",
                 opacity: stage === "redirecting" ? 1 : 0.5,
-              }}
-            >
+              }}>
               <FiPhone size={18} />
-              <span>
-                {stage === "redirecting" ? "Joining..." : "Accept"}
-              </span>
+              <span>{stage === "redirecting" ? "Joining..." : "Accept"}</span>
             </button>
           </div>
         </div>
@@ -462,8 +477,7 @@ const IncomingCallPage = () => {
               color: "rgba(148,163,184,0.25)",
               letterSpacing: "0.06em",
               fontFamily: "monospace",
-            }}
-          >
+            }}>
             MTG · {meetingID.slice(-10).toUpperCase()}
           </p>
         )}

@@ -59,6 +59,7 @@ export const callSlice = createSlice({
       Object.assign(state, initialState);
       state.callStartTime = null;
       localStorage.setItem("callStatus", "idle");
+      localStorage.removeItem("callStartTime");
     },
   },
 });
