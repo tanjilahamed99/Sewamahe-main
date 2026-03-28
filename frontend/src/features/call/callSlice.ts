@@ -53,10 +53,12 @@ export const callSlice = createSlice({
     callAccepted(state) {
       state.status = "in-call";
       state.callStartTime = Date.now();
+      localStorage.setItem("callStatus", "in-call");
     },
     callEnded(state) {
       Object.assign(state, initialState);
       state.callStartTime = null;
+      localStorage.setItem("callStatus", "idle");
     },
   },
 });

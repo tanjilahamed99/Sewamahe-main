@@ -42,7 +42,7 @@ const IncomingCallPage = () => {
 
             setStage("connecting");
             await answerCall({ userID: data.caller._id });
-
+            localStorage.setItem("callStartTime", Date.now());
             setStage("redirecting");
             setTimeout(() => {
               navigate(`/meeting/${meetingID}`, { replace: true });

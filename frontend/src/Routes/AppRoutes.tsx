@@ -25,10 +25,12 @@ export const AppRoutes = () => {
     initIO(token);
   }, [token, user]);
 
-  // useEffect(() => {
-  //   if (!call.incoming && user) return;
-  //   navigate(`/meeting/${call.meetingID}`, { replace: true });
-  // }, [call, navigate]);
+  useEffect(() => {
+    if (user) {
+      if (!call.incoming && user) return;
+      navigate(`/meeting/${call.meetingID}`, { replace: true });
+    }
+  }, [call, navigate]);
 
   return (
     <Routes>

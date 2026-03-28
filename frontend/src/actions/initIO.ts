@@ -12,7 +12,7 @@ import { initSocket } from "@/lib/socket";
 import {
   callAccepted,
   callEnded,
-incomingCall,
+  incomingCall,
   setCallToken,
 } from "@/features/call/callSlice";
 
@@ -71,10 +71,15 @@ const initIO = (token: string) => {
 
   socket.on("answer", () => {
     store.dispatch(callAccepted());
+    const callTime = localStorage.getItem("callStartTime");
+    if (!callTime) {
+      localStorage.setItem("callStartTime", Date.now());
+    }
   });
 
   socket.on("close", () => {
     store.dispatch(callEnded());
+    localStorage.removeItem("callStartTime");
   });
 
   return socket;

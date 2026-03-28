@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useDispatch";
-import { callEnded, setCallToken } from "@/features/call/callSlice";
+import {
+  callEnded,
+  incomingCall,
+  setCallToken,
+} from "@/features/call/callSlice";
 import API from "@/lib/axios";
 
 import {
@@ -12,28 +16,26 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import Ringing from "./components/Ringing";
-import { closeCall } from "@/actions/call";
+import { answerCall, closeCall, getCustomCallData } from "@/actions/call";
 import { toast } from "sonner";
 import { updateMyBalance } from "@/actions/history";
 import { updateUser } from "@/features/auth/authSlice";
+import { store } from "@/store";
 
 const Meeting = () => {
-  const {
-    roomId,
-    token,
-    type,
-    status,
-    callee,
-    caller,
-    callStartTime,
-    incoming,
-  } = useAppSelector((s) => s.call);
+  const { roomId, token, type, status, callee, caller, incoming } =
+    useAppSelector((s) => s.call);
   const user = useAppSelector((s) => s.auth.user);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const adminDefaultPerMinPrice = import.meta.env
     .VITE_ADMIN_DEFAULT_PER_MINUTE_CHARGE;
   const intervalRef = useRef(null);
+  const { roomId: meetingID } = useParams();
+  const callStatus = localStorage.getItem("callStatus");
+  const callTime = localStorage.getItem("callStartTime");
+
+  console.log(callTime);
 
   useEffect(() => {
     async function join() {
@@ -44,19 +46,18 @@ const Meeting = () => {
           userId: user._id,
           calleeId: callee._id,
         });
-        console.log("generate token", data);
         dispatch(setCallToken(data.token));
       } catch (error) {
         console.log(error);
       }
     }
     join();
-  }, []);
+  }, [roomId, callee]);
 
   useEffect(() => {
-    if (callStartTime) {
+    if (callTime) {
       intervalRef.current = setInterval(() => {
-        const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
+        const totalSeconds = Math.floor((Date.now() - callTime) / 1000);
         if (!incoming && user.type === "user" && callee.type === "Consultant") {
           const price = callee.price || adminDefaultPerMinPrice;
           const myPerSecPrice = parseFloat(price) / 60;
@@ -74,7 +75,7 @@ const Meeting = () => {
     }
 
     return () => clearInterval(intervalRef.current);
-  }, [callStartTime]);
+  }, [callTime]);
 
   const handleCallEnd = async () => {
     await closeCall({
@@ -82,13 +83,14 @@ const Meeting = () => {
     });
     dispatch(callEnded());
     navigate("/dashboard", { replace: true });
+    localStorage.removeItem("callStartTime");
     return;
   };
 
   const handleDisconnect = async () => {
-    if (!callStartTime) return handleCallEnd();
+    if (!callTime) return handleCallEnd();
 
-    const totalSeconds = Math.floor((Date.now() - callStartTime) / 1000);
+    const totalSeconds = Math.floor((Date.now() - callTime) / 1000);
 
     // charge system
     if (
@@ -107,7 +109,6 @@ const Meeting = () => {
       return handleCallEnd();
     }
     if (user.type === "Consultant" && !incoming) {
-      console.log("hello");
       // consultant call has no charge
       return handleCallEnd();
     }
@@ -196,16 +197,29 @@ const Meeting = () => {
     }
   };
 
+  useEffect(() => {
+    if (callStatus === "in-call" && !callee) {
+      const fetchData = async () => {
+        try {
+          const data = await getCustomCallData(meetingID);
+          if (data.status === 200) {
+            store.dispatch(incomingCall(data));
+            await answerCall({ userID: data.caller._id });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchData();
+    }
+  }, []);
+
   // 🔔 Incoming Call Screen
   if (status === "ringing" || status === "calling") return <Ringing />;
-  if (status === "idle") {
+  if (callStatus === "idle") {
     dispatch(callEnded());
     navigate("/dashboard", { replace: true });
     return null;
-  }
-
-  if (!callee) {
-    navigate("/dashboard");
   }
 
   // 🔌 Connecting Screen

@@ -22,6 +22,7 @@ export default function Ringing() {
   }, []);
 
   const joinCall = async () => {
+    localStorage.setItem("callStartTime", Date.now());
     await answerCall({ userID: incoming ? call.caller._id : call.callee._id });
   };
 
