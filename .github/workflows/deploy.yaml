@@ -3,7 +3,7 @@ name: Deploy to Docker Hub
 on:
   push:
     branches:
-      - tanjil
+      - main
 
 jobs:
   deploy:
