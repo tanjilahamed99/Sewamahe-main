@@ -262,7 +262,7 @@ export const Home = () => {
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-black/5 border border-gray-200 mb-6">
                 <Sparkles className="h-4 w-4 text-black mr-2" />
                 <span className="text-sm font-medium text-gray-700">
-                  {/* Trusted by 5000+ professionals */}
+                  Trusted by 5000+ professionals
                 </span>
               </div>
 
