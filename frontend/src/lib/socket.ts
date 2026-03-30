@@ -4,10 +4,15 @@ import IO from "socket.io-client";
 let socket = null;
 export const initSocket = (token: string) => {
   if (!socket) {
-    socket = IO("sewamahe.in", {
-        auth: { token },
-        transports: ["websocket"],
-        withCredentials: true,
+    // socket = IO("sewamahe.in", {
+    //     auth: { token },
+    //     transports: ["websocket"],
+    //     withCredentials: true,
+    // });
+    socket = IO("https://sewamahe.in", {
+      auth: { token },
+      transports: ["websocket"],
+      withCredentials: true,
     });
     // socket = IO(configuration.url, {
     //   auth: { token },

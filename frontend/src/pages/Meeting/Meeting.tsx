@@ -39,7 +39,7 @@ const Meeting = () => {
     async function join() {
       try {
         if (token) return;
-        if (!callee) return;
+        // if (!callee) return;
         const { data } = await API.post("/api/livekit/token", {
           roomName: roomId,
           userId: user._id,
@@ -202,7 +202,6 @@ const Meeting = () => {
         try {
           const data = await getCustomCallData(meetingID);
           if (data.status === 200) {
-            console.log(data);
             store.dispatch(incomingCall(data));
             await answerCall({ userID: data.caller._id });
           }

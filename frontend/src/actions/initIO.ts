@@ -78,6 +78,7 @@ const initIO = (token: string) => {
   });
 
   socket.on("close", () => {
+    console.log("Call ended by the other user");
     store.dispatch(callEnded());
     localStorage.removeItem("callStartTime");
   });
