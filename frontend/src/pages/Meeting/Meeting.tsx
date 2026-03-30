@@ -39,7 +39,7 @@ const Meeting = () => {
     async function join() {
       try {
         if (token) return;
-        // if (!callee) return;
+        if (!callee) return;
         const { data } = await API.post("/api/livekit/token", {
           roomName: roomId,
           userId: user._id,
