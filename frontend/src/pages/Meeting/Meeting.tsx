@@ -202,6 +202,7 @@ const Meeting = () => {
         try {
           const data = await getCustomCallData(meetingID);
           if (data.status === 200) {
+            console.log(data);
             store.dispatch(incomingCall(data));
             await answerCall({ userID: data.caller._id });
           }
@@ -214,7 +215,8 @@ const Meeting = () => {
   }, []);
 
   // 🔔 Incoming Call Screen
-  if (status === "ringing" || status === "calling") return <Ringing />;
+  if ((status === "ringing" || status === "calling") && callStatus === "idle")
+    return <Ringing />;
   if (callStatus === "idle") {
     dispatch(callEnded());
     navigate("/dashboard", { replace: true });

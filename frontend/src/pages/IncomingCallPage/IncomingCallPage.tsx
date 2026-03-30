@@ -64,6 +64,8 @@ const IncomingCallPage = () => {
               setTimeout(() => {
                 navigate(`/meeting/${meetingID}`, { replace: true });
               }, 800);
+            } else {
+              navigate(`/dashboard`);
             }
           }
         } catch (error: any) {
