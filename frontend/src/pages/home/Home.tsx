@@ -32,11 +32,10 @@ import {
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
+import AppDownload from "./AppDownload";
 
 export const Home = () => {
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
-
 
   const features = [
     {
@@ -249,7 +248,6 @@ export const Home = () => {
     { value: "24/7", label: "Support Availability", icon: <Headphones /> },
   ];
 
-
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -262,7 +260,7 @@ export const Home = () => {
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-black/5 border border-gray-200 mb-6">
                 <Sparkles className="h-4 w-4 text-black mr-2" />
                 <span className="text-sm font-medium text-gray-700">
-                  {/* Trusted by 5000+ professionals */}
+                  Trusted by 50,000+ professionals
                 </span>
               </div>
 
@@ -452,6 +450,8 @@ export const Home = () => {
           </div>
         </div>
       </section>
+
+      <AppDownload />
 
       {/* Expert Categories */}
       <section className="py-24 bg-gradient-to-b from-white to-gray-50">
