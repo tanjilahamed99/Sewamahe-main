@@ -32,11 +32,10 @@ import {
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
+import AppDownload from "./AppDownload";
 
 export const Home = () => {
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
-
 
   const features = [
     {
@@ -249,7 +248,6 @@ export const Home = () => {
     { value: "24/7", label: "Support Availability", icon: <Headphones /> },
   ];
 
-
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -452,6 +450,8 @@ export const Home = () => {
           </div>
         </div>
       </section>
+
+      <AppDownload />
 
       {/* Expert Categories */}
       <section className="py-24 bg-gradient-to-b from-white to-gray-50">
