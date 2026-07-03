@@ -236,6 +236,17 @@ exports.razorpayValidate = async (req, res) => {
       });
     }
 
+    const idUsed = await User.findOne({
+      "history.razorpay.razorpay_order_id": orderId,
+    });
+
+    if (idUsed) {
+      return res.status(400).send({
+        message: "This order ID has already been processed.",
+        success: false,
+      });
+    }
+
     const newEntry = {
       historyType: "top-up",
       amount,
@@ -268,7 +279,7 @@ exports.razorpayValidate = async (req, res) => {
         $set: {
           history,
           balance: {
-            amount: currentBalance + parseFloat(amount),
+            amount: currentBalance + amount,
           },
         },
       },

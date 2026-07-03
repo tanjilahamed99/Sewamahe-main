@@ -52,7 +52,10 @@ const RazorpayCheck = () => {
           setTimeout(() => check(attempt + 1), 2000);
         } else {
           setStatus("failed");
-          setMessage("Something went wrong while verifying your payment.");
+          setMessage(
+            err.response?.data?.message ||
+              "Something went wrong while verifying your payment.",
+          );
         }
       }
     };
@@ -107,7 +110,7 @@ const RazorpayCheck = () => {
             <h2 className="text-xl font-bold text-gray-900 mb-2">
               Payment Not Verified
             </h2>
-            <p className="text-gray-600 text-sm mb-6">{message}</p>
+            <p className="text-red-600 text-sm mb-6">{message}</p>
             <Link to="/monetization">
               <button className="w-full py-3 px-6 rounded-xl border border-gray-300 text-gray-700 font-bold hover:bg-gray-50 cursor-pointer">
                 Back to Monetization
