@@ -22,6 +22,7 @@ import AdminTerms from "@/pages/Admin/AdminTerms";
 import AdminPrivacy from "@/pages/Admin/AdminPrivacy";
 import Failed from "@/pages/Monetization/Failed";
 import PaymentSuccess from "@/pages/Monetization/Success";
+import RazorpayCheck from "@/pages/Monetization/RazorpayPaymentValidate";
 
 function PrivetRoutes() {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ function PrivetRoutes() {
             element={<DashBoard isHome={isHome} setisHome={setIsHome} />}
           />
           <Route path="/monetization" element={<Monetization />} />
+          <Route path="/monetization/razorpay" element={<RazorpayCheck />} />
           <Route path="/monetization/success" element={<PaymentSuccess />} />
           <Route path="/monetization/failed" element={<Failed />} />
           <Route path="/room/:id" element={<Conversation />} />

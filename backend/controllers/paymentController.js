@@ -67,28 +67,232 @@ exports.createPaymentIntent = async (req, res) => {
 };
 
 exports.razorpayPaymentValidate = async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-    req.body;
-  const keys = await Razorpay.findOne();
-  if (!keys) {
-    return res.send({
+  try {
+    const { razorpay_order_id, userId, amount } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing payment verification fields",
+      });
+    }
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID provided.",
+      });
+    }
+
+    const keys = await Razorpay.findOne();
+    if (!keys) {
+      return res.status(400).json({
+        success: false,
+        message: "Something is wrong",
+      });
+    }
+
+    const sha = crypto.createHmac("sha256", keys.secret);
+    sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+    const digest = sha.digest("hex");
+
+    if (digest !== razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        message: "Transaction is not legit!",
+      });
+    }
+
+    const isExistingUser = await User.findById(userId);
+    if (!isExistingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const newEntry = {
+      historyType: "top-up",
+      amount,
+      paymentMethod: "Razorpay",
+      status: "completed",
+      razorpay: { razorpay_order_id, razorpay_payment_id, razorpay_signature },
+      author: {
+        name: `${isExistingUser?.firstName} ${isExistingUser?.lastName}`,
+        email: isExistingUser?.email,
+        id: userId.id,
+      },
+    };
+
+    let history = [];
+    if (isExistingUser.history.length > 0) {
+      history = [newEntry, ...isExistingUser.history];
+    } else {
+      history = [newEntry];
+    }
+
+    const currentBalance = isExistingUser.balance?.amount || 0;
+
+    const updateUserData = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          history,
+          balance: {
+            amount: currentBalance + parseFloat(amount),
+          },
+        },
+      },
+      { new: true },
+    );
+
+    if (!updateUserData) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update user data.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Top-up successful.",
+    });
+  } catch (error) {
+    console.log("razorpayPaymentValidate error:", error);
+    return res.status(500).json({
       success: false,
-      message: "Something is wrong",
+      message: "An error occurred while processing your request.",
     });
   }
-  const sha = crypto.createHmac("sha256", keys.secret);
-  //order_id + "|" + razorpay_payment_id
-  sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-  const digest = sha.digest("hex");
-  if (digest !== razorpay_signature) {
-    return res.status(400).json({ msg: "Transaction is not legit!" });
-  }
+};
 
-  res.json({
-    msg: "success",
-    orderId: razorpay_order_id,
-    paymentId: razorpay_payment_id,
-  });
+exports.razorpayValidate = async (req, res) => {
+  try {
+    const { orderId, userId } = req.body;
+
+    if (!orderId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "orderId is required" });
+    }
+
+    const credentials = await Razorpay.findOne();
+    if (!credentials) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Credentials not found" });
+    }
+
+    const razorpay = new Razorpays({
+      key_id: credentials.key,
+      key_secret: credentials.secret,
+    });
+
+    // Fetch the order itself (has notes: userId, subId, amount)
+    let order;
+    try {
+      order = await razorpay.orders.fetch(orderId);
+    } catch (err) {
+      console.log("Order fetch error:", err);
+      return res
+        .status(400)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    // Fetch all payment attempts linked to this order
+    const paymentsList = await razorpay.orders.fetchPayments(orderId);
+    const capturedPayment = paymentsList.items.find(
+      (p) => p.status === "captured",
+    );
+
+    const amount = order.amount / 100;
+
+    if (!capturedPayment) {
+      const latestAttempt = paymentsList.items[paymentsList.items.length - 1];
+      return res.json({
+        success: false,
+        status: latestAttempt ? latestAttempt.status : "no_attempt",
+        message: latestAttempt
+          ? `Payment status: ${latestAttempt.status}`
+          : "No payment attempt found for this order",
+      });
+    }
+
+    const isExistingUser = await User.findById(userId);
+    if (!isExistingUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Idempotency — already processed this payment before
+    const alreadyProcessed = (isExistingUser.transactionHistory || []).some(
+      (t) => t.razorpay?.razorpay_payment_id === capturedPayment.id,
+    );
+    if (alreadyProcessed) {
+      return res.json({
+        success: true,
+        message: "Payment already verified and applied",
+      });
+    }
+
+    const newEntry = {
+      historyType: "top-up",
+      amount,
+      paymentMethod: "Razorpay",
+      status: "completed",
+      razorpay: {
+        razorpay_order_id: order.id,
+        razorpay_payment_id: capturedPayment.id,
+        razorpay_signature: "",
+      },
+      author: {
+        name: `${isExistingUser?.firstName} ${isExistingUser?.lastName}`,
+        email: isExistingUser?.email,
+        id: isExistingUser._id,
+      },
+    };
+
+    let history = [];
+    if (isExistingUser.history.length > 0) {
+      history = [newEntry, ...isExistingUser.history];
+    } else {
+      history = [newEntry];
+    }
+
+    const currentBalance = isExistingUser.balance?.amount || 0;
+
+    const updateUserData = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          history,
+          balance: {
+            amount: currentBalance + parseFloat(amount),
+          },
+        },
+      },
+      { new: true },
+    );
+
+    if (!updateUserData) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update user data.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Top-up successful.",
+    });
+  } catch (err) {
+    console.log("validate-order error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while validating payment",
+    });
+  }
 };
 
 exports.topUp = async (req, res) => {
@@ -145,7 +349,7 @@ exports.topUp = async (req, res) => {
           },
         },
       },
-      { new: true }
+      { new: true },
     );
     if (!updateUserData) {
       return res.status(500).send({
@@ -202,7 +406,7 @@ exports.paygic = async (req, res) => {
 
     // Generate a unique receipt ID
     const receiptId = `REC-${Date.now()}-${Math.floor(
-      Math.random() * 1000000
+      Math.random() * 1000000,
     )}`;
 
     const { data } = await axios.post(
@@ -211,7 +415,7 @@ exports.paygic = async (req, res) => {
         mid: keys.mid,
         password: keys.password,
         expiry: false,
-      }
+      },
     );
 
     const { data: response } = await axios.post(
@@ -230,7 +434,7 @@ exports.paygic = async (req, res) => {
         headers: {
           token: data.data.token,
         },
-      }
+      },
     );
     if (response.status) {
       return res.send({
@@ -253,6 +457,7 @@ exports.paygic = async (req, res) => {
     });
   }
 };
+
 exports.paygicPaymentValidate = async (req, res) => {
   try {
     const { merchantReferenceId, userId } = req.body;
@@ -286,12 +491,12 @@ exports.paygicPaymentValidate = async (req, res) => {
     // Check if merchantReferenceId already exists in user's history
     // Check ALL users if this merchantReferenceId exists
     const idUsed = await User.findOne({
-      'history.paygic.merchantReferenceId': merchantReferenceId,
+      "history.paygic.merchantReferenceId": merchantReferenceId,
     });
 
     if (idUsed) {
       return res.status(400).send({
-        message: 'This payment ID has already been processed.',
+        message: "This payment ID has already been processed.",
         success: false,
       });
     }
@@ -303,7 +508,7 @@ exports.paygicPaymentValidate = async (req, res) => {
         mid: keys.mid,
         password: keys.password,
         expiry: false,
-      }
+      },
     );
 
     // Check payment status from Paygic
@@ -317,7 +522,7 @@ exports.paygicPaymentValidate = async (req, res) => {
         headers: {
           token: tokenData.data.token,
         },
-      }
+      },
     );
 
     if (!paymentStatus.status) {
@@ -353,7 +558,12 @@ exports.paygicPaymentValidate = async (req, res) => {
     const myUpdate = await User.findOneAndUpdate(
       { _id: userId },
       {
-        $set: { balance: { amount: findUser.balance.amount + parseFloat(paymentStatus.data.amount) } },
+        $set: {
+          balance: {
+            amount:
+              findUser.balance.amount + parseFloat(paymentStatus.data.amount),
+          },
+        },
         $push: {
           history: {
             $each: [
@@ -365,7 +575,7 @@ exports.paygicPaymentValidate = async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!myUpdate) {
@@ -447,7 +657,7 @@ exports.withdrawRequest = async (req, res) => {
           },
         },
       },
-      { new: true }
+      { new: true },
     );
     if (!updateUserData) {
       return res.status(500).send({

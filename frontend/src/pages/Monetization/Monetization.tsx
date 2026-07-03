@@ -44,6 +44,19 @@ export default function Monetization() {
   };
 
   useEffect(() => {
+    const pending = localStorage.getItem("pendingRazorpayOrder");
+    if (pending) {
+      const { orderId, ts } = JSON.parse(pending);
+      // only chase orders from the last ~30 min, ignore stale ones
+      if (Date.now() - ts < 30 * 60 * 1000) {
+        window.location.href = `/monetization/razorpay?orderId=${orderId}`;
+      } else {
+        localStorage.removeItem("pendingRazorpayOrder");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       const result = await myData();
       if (result?.data) {
